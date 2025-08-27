@@ -1,5 +1,10 @@
-const socket = io();
-
+const socket = io('https://my-chat-app-azvr.onrender.com');
+const io = new Server(server, {
+  cors: {
+    origin: "https://genuine-vacherin-f77495.netlify.app",
+    methods: ["GET", "POST"]
+  }
+});
 // Get the HTML elements
 const form = document.getElementById('form');
 const input = document.getElementById('input');
