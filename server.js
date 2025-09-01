@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // Replace this with your actual Netlify URL
-    origin: "genuine-vacherin-f77495.netlify.app",
+    origin: "https://genuine-vacherin-f77495.netlify.app",
     methods: ["GET", "POST"]
   }
 });
