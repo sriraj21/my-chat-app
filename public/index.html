@@ -1,30 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Simple Chat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
     <div class="chat-container">
         <div class="sidebar">
-            <h2>Online Users</h2>
+            <h2 class="app-title">Moment</h2>
+            <h3>Online Users</h3>
             <ul id="user-list">
-                </ul>
+                <!-- User list will be populated by JavaScript -->
+            </ul>
         </div>
         <div class="main-chat">
             <header class="chat-header">
                 <h1>Chat with <span id="recipient-name">...</span></h1>
             </header>
             <div id="messages">
-                </div>
+                <!-- Messages will appear here -->
+            </div>
             <form id="form">
                 <input id="input" autocomplete="off" placeholder="Type a message..." />
-                <button>Send</button>
+                <button type="submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
             </form>
         </div>
     </div>
 
+    <!-- Tone.js for audio feedback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <!-- Socket.IO client library -->
     <script src="/socket.io/socket.io.js"></script>
+    <!-- Your custom client-side logic -->
     <script src="client.js"></script>
 </body>
 </html>
