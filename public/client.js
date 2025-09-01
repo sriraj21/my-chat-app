@@ -1,47 +1,57 @@
-const socket = io('https://my-chat-app-azvr.onrender.com');
+const socket = io('https://my-chat-app-azvr.onrender.com'); // Your Render URL
 
-// Get the HTML elements
+const userList = document.getElementById('user-list');
+const messages = document.getElementById('messages');
 const form = document.getElementById('form');
 const input = document.getElementById('input');
-const messages = document.getElementById('messages');
+const recipientName = document.getElementById('recipient-name');
 
-// Ask the user for their name when they connect
-const username = prompt("What is your name?");
+let currentRecipient = '';
+let username = '';
 
-// Listen for the 'loadMessages' event to get the chat history
-socket.on('loadMessages', (messages) => {
-    messages.forEach(msgObject => {
-        const item = document.createElement('li');
-        item.textContent = `${msgObject.user}: ${msgObject.text}`;
-        document.getElementById('messages').appendChild(item);
+// Get username from prompt and notify the server
+username = prompt("What is your name?");
+if (username) {
+    socket.emit('addUser', username);
+}
+
+// Update the online user list
+socket.on('updateUserList', (users) => {
+    userList.innerHTML = '';
+    users.forEach(user => {
+        if (user !== username) { // Don't show the user their own name in the list
+            const li = document.createElement('li');
+            li.textContent = user;
+            li.addEventListener('click', () => {
+                currentRecipient = user;
+                recipientName.textContent = user;
+                messages.innerHTML = ''; // Clear messages when switching user
+            });
+            userList.appendChild(li);
+        }
     });
-    window.scrollTo(0, document.body.scrollHeight);
 });
 
-// Add an event listener for when the form is submitted
+// Handle form submission to send a private message
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-
-    if (input.value && username) {
-        // Create a message object with the username and text
-        const messageObject = {
-            user: username,
+    if (input.value && currentRecipient) {
+        socket.emit('privateMessage', {
+            recipient: currentRecipient,
             text: input.value
-        };
-        
-        // Send the message OBJECT to the server
-        socket.emit('chatMessage', messageObject);
-        
-        // Clear the input box after sending
+        });
         input.value = '';
     }
 });
 
-// Listen for the 'chatMessage' event from the server
-socket.on('chatMessage', (msgObject) => {
-    const item = document.createElement('li');
-    // Display the message as "user: text"
-    item.textContent = `${msgObject.user}: ${msgObject.text}`;
+// Display incoming private messages
+socket.on('privateMessage', ({ sender, text }) => {
+    const item = document.createElement('div');
+    item.classList.add('message');
+    if (sender === username) {
+        item.classList.add('my-message');
+    }
+    item.innerHTML = `<strong>${sender}</strong>: ${text}`;
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
 });
