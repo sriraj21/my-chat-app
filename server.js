@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 
 // --- DATABASE CONNECTION ---
 // Make sure to replace YOUR_REAL_PASSWORD_HERE with your actual database password
-const dbURI = "mongodb+srv://chat_user:YOUR_REAL_PASSWORD_HERE@cluster0.0nefij1.mongodb.net/chat-app?retryWrites=true&w=majority&appName=Cluster0";
+const dbURI = "mongodb+srv://chat_user:Sriraj2004@cluster0.0nefij1.mongodb.net/chat-app?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(dbURI)
   .then(() => console.log('Connected to MongoDB'))
