@@ -6,39 +6,68 @@
     <title>Moment</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <div class="chat-container">
+
+    <!-- This is the initial login screen -->
+    <div id="login-screen">
+        <div class="login-container">
+            <h1 class="app-title">Moment</h1>
+            <p>A private space to connect.</p>
+            <button id="google-signin-btn">
+                <svg aria-hidden="true" class="google-icon" width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8.1H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4"></path><path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-2.7 1.01c-2.09 0-3.87-1.4-4.5-3.3l-2.64 2.03A8 8 0 008.98 17z" fill="#34A853"></path><path d="M4.48 10.37a4.8 4.8 0 010-3.74l-2.63-2.03a8 8 0 000 7.8z" fill="#FBBC05"></path><path d="M8.98 3.33a4.7 4.7 A0 013.27 1.25l2.28-2.27A8 8 0 001.02 4.63l2.64 2.03c.63-1.9 2.4-3.3 4.32-3.3z" fill="#EA4335"></path></svg>
+                Sign In with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- This screen shows while we check the user's approval status -->
+    <div id="loading-screen" class="hidden">
+        <div class="spinner"></div>
+        <p>Verifying...</p>
+    </div>
+    
+    <!-- This screen shows if the user is waiting for approval -->
+    <div id="pending-approval-screen" class="hidden">
+        <div class="login-container">
+            <h1 class="app-title">Moment</h1>
+            <h2>Request Sent</h2>
+            <p>Your account is pending approval. Please contact the administrator.</p>
+        </div>
+    </div>
+
+    <!-- This is the main chat application -->
+    <div id="chat-screen" class="chat-container hidden">
         <div class="sidebar">
             <h2 class="app-title">Moment</h2>
             <h3>Online Users</h3>
-            <ul id="user-list">
-                <!-- User list will be populated by JavaScript -->
-            </ul>
+            <ul id="user-list"></ul>
+            <button id="sign-out-btn">Sign Out</button>
         </div>
         <div class="main-chat">
             <header class="chat-header">
                 <h1>Chat with <span id="recipient-name">...</span></h1>
             </header>
-            <div id="messages">
-                <!-- Messages will appear here -->
-            </div>
+            <div id="messages"></div>
             <form id="form">
                 <input id="input" autocomplete="off" placeholder="Type a message..." />
-                <button type="submit">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                <button type="submit" aria-label="Send Message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Tone.js for audio feedback -->
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+
+    <!-- Other Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-    <!-- Socket.IO client library -->
     <script src="/socket.io/socket.io.js"></script>
-    <!-- Your custom client-side logic -->
     <script src="client.js"></script>
 </body>
 </html>
+
