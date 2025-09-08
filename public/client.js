@@ -1,4 +1,4 @@
-// --- PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE ---
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBhlesPeg7mcicF7HltvK4bmLuiiAtDWgY",
   authDomain: "moment-chat-a24e8.firebaseapp.com",
@@ -8,7 +8,6 @@ const firebaseConfig = {
   appId: "1:806882645852:web:76672d07fd064ef02ed399",
   measurementId: "G-CCHZWCX8XS"
 };
-
 // --- INITIALIZE LIBRARIES ---
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
