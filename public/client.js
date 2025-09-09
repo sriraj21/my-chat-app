@@ -41,7 +41,7 @@ let currentRecipient = '';
 let currentUser = null;
 
 // --- AUTHENTICATION FLOW (No changes) ---
-googleSignInBtn.addEventListener('click', () => auth.signInWithPopup(provider));
+googleSignInBtn.addEventListener('click', () => auth.signInWithRedirect(provider));
 signOutBtn.addEventListener('click', () => auth.signOut());
 // This is the updated function in your public/client.js file
 
