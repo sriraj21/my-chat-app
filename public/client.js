@@ -1,5 +1,4 @@
-const { initializeApp } = firebase;
-const { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } = firebase.auth;
+
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBhlesPeg7mcicF7HltvK4bmLuiiAtDWgY",
@@ -11,10 +10,10 @@ const firebaseConfig = {
   measurementId: "G-CCHZWCX8XS"
 };
 
-// --- INITIALIZE LIBRARIES ---
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+// --- INITIALIZE LIBRARIES (Corrected Compat Syntax) ---
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
 const synth = new Tone.Synth().toDestination();
 let socket;
 
@@ -34,11 +33,11 @@ const recipientName = document.getElementById('recipient-name');
 let currentRecipient = '';
 let currentUser = null;
 
-// --- AUTHENTICATION FLOW ---
-googleSignInBtn.addEventListener('click', () => signInWithPopup(auth, provider));
-signOutBtn.addEventListener('click', () => signOut(auth));
+// --- AUTHENTICATION FLOW (Corrected Compat Syntax) ---
+googleSignInBtn.addEventListener('click', () => auth.signInWithPopup(provider));
+signOutBtn.addEventListener('click', () => auth.signOut());
 
-onAuthStateChanged(auth, async user => {
+auth.onAuthStateChanged(async user => {
     if (user) {
         currentUser = { name: user.displayName, email: user.email, uid: user.uid };
         showScreen('loading');
@@ -134,6 +133,3 @@ form.addEventListener('submit', (e) => {
         input.value = '';
     }
 });
-
-
-
