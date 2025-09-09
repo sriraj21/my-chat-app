@@ -65,7 +65,7 @@ async function checkUserApproval() {
 
     if (data.status === 'approved') {
         showScreen('chat');
-        initializeApp(currentUser);
+        initializeChat(currentUser); // <-- EDITED: Function call renamed
     } else {
         showScreen('pending');
     }
@@ -84,7 +84,8 @@ function showScreen(screenName) {
 }
 
 // --- CHAT APPLICATION LOGIC ---
-function initializeApp(user) {
+// <-- EDITED: Function declaration renamed
+function initializeChat(user) {
     socket = io(); // Connects to the same server that serves the files
     socket.on('connect', () => socket.emit('addUser', user.name));
 
@@ -135,4 +136,5 @@ form.addEventListener('submit', (e) => {
         input.value = '';
     }
 });
+
 
