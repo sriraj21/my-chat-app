@@ -17,7 +17,7 @@
             <h1 class="app-title">Moment</h1>
             <p>A private space to connect.</p>
             <button id="google-signin-btn">
-                <svg aria-hidden="true" class="google-icon" width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8.1H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4"></path><path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-2.7 1.01c-2.09 0-3.87-1.4-4.5-3.3l-2.64 2.03A8 8 0 008.98 17z" fill="#34A853"></path><path d="M4.48 10.37a4.8 4.8 0 010-3.74l-2.63-2.03a8 8 0 000 7.8z" fill="#FBBC05"></path><path d="M8.98 3.33a4.7 4.7 0 013.27 1.25l2.28-2.27A8 8 0 001.02 4.63l2.64 2.03c.63-1.9 2.4-3.3 4.32-3.3z" fill="#EA4335"></path></svg>
+                <svg aria-hidden="true" class="google-icon" width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8.1H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4"></path><path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-2.7 1.01c-2.09 0-3.87-1.4-4.5-3.3l-2.64 2.03A8 8 0 008.98 17z" fill="#34A853"></path><path d="M4.48 10.37a4.8 4.8 0 010-3.74l-2.63-2.03a8 8 0 000 7.8z" fill="#FBBC05"></path><path d="M8.98 3.33a4.7 4.7 S0 013.27 1.25l2.28-2.27A8 8 0 001.02 4.63l2.64 2.03c.63-1.9 2.4-3.3 4.32-3.3z" fill="#EA4335"></path></svg>
                 Sign In with Google
             </button>
         </div>
@@ -60,12 +60,16 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+    
     <!-- Other Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     
-    <!-- Main application script loaded as a module -->
-    <script type="module" src="client.js"></script>
+    <!-- Main application script -->
+    <script src="client.js"></script>
 </body>
 </html>
 
