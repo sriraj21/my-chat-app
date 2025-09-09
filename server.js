@@ -8,26 +8,25 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const app = express();
 const server = http.createServer(app);
 
-// --- SECURITY HEADER MIDDLEWARE (from previous step) ---
+// --- MIDDLEWARE & SECURITY HEADERS ---
+app.use(express.json());
+app.use(express.static('public'));
 app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   next();
 });
-app.use(express.json());
 
 // --- ENVIRONMENT VARIABLES (IMPORTANT!) ---
-const GIPHY_API_KEY = "8eWGuuwS23zczSDy52C6LOvcqeUvVPsX";
-const GEMINI_API_KEY = ""; // Keep this blank for Render's built-in authentication
+// These lines read the secret keys you set up on the Render dashboard.
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const giphyApiKey = process.env.GIPHY_API_KEY;
 
-// Initialize the Google Gemini AI Client
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-// --- SOCKET.IO CONFIGURATION (no CORS needed for single-server setup) ---
+// --- SOCKET.IO CONFIGURATION ---
 const io = new Server(server, {});
 
 // --- DATABASE CONNECTION & SCHEMA ---
 const PORT = process.env.PORT || 3000;
-const dbURI = "mongodb+srv://chat_user:Sriraj2004@cluster0.0nefij1.mongodb.net/chat-app?retryWrites=true&w=majority&appName=Cluster0";
+const dbURI = "mongodb+srv://chat_user:Sriraj2004@cluster0.0nefij1.mongodb.net/chat-app?retryWrites=true&w=majority&appName=Cluster0"; // Remember to put your password here
 const userSchema = new mongoose.Schema({
     googleId: { type: String, required: true, unique: true },
     name: String,
@@ -39,11 +38,11 @@ const User = mongoose.model('User', userSchema);
 mongoose.connect(dbURI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
-app.use(express.static('public'));
+
 
 // --- API ENDPOINTS ---
 
-// Login Endpoint (no changes)
+// Login Endpoint
 app.post('/api/login', async (req, res) => {
     const { googleId, name, email } = req.body;
     if (!googleId || !name || !email) return res.status(400).json({ message: 'Missing user information.' });
@@ -60,14 +59,12 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// --- NEW AI & GIPHY ENDPOINTS ---
-
 // Giphy Search Endpoint
 app.post('/api/giphy', async (req, res) => {
     const { query } = req.body;
     if (!query) return res.status(400).json({ message: 'Search query is required.' });
     try {
-        const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=12&rating=g`;
+        const url = `https://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${encodeURIComponent(query)}&limit=12&rating=g`;
         const giphyResponse = await fetch(url);
         const data = await giphyResponse.json();
         res.json(data);
@@ -97,14 +94,14 @@ app.post('/api/imagine', async (req, res) => {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ message: 'A prompt is required.' });
     try {
-        // NOTE: The exact model name and response structure for image generation can change.
-        // This code assumes a model named 'imagen-2' and a direct image bytes response.
-        const model = genAI.getGenerativeModel({ model: "imagen-2"});
-        const result = await model.generateContent(prompt);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-preview-0514"});
+        const result = await model.generateContent(`Generate an image of: ${prompt}. Do not include any text, just the image.`);
         const response = await result.response;
-        // This part is highly dependent on the Gemini API response structure.
-        // Let's assume for now it sends back image data that can be converted to a data URL.
-        const imageBytes = response.candidates[0].content.parts[0].inlineData.data;
+        const part = response.candidates[0].content.parts.find(p => p.inlineData);
+        if (!part) {
+           throw new Error("No image data found in AI response.");
+        }
+        const imageBytes = part.inlineData.data;
         const imageUrl = `data:image/png;base64,${imageBytes}`;
         res.json({ imageUrl });
     } catch (error) {
@@ -121,7 +118,6 @@ io.on('connection', (socket) => {
         io.emit('updateUserList', Object.keys(onlineUsers));
     });
 
-    // Modified to handle different message types
     socket.on('privateMessage', ({ recipient, message }) => {
         const recipientSocketId = onlineUsers[recipient];
         const senderUsername = Object.keys(onlineUsers).find(key => onlineUsers[key] === socket.id);
@@ -141,6 +137,7 @@ io.on('connection', (socket) => {
     });
 });
 
+// --- START THE SERVER ---
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
