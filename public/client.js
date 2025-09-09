@@ -8,10 +8,12 @@ const firebaseConfig = {
   appId: "1:806882645852:web:76672d07fd064ef02ed399",
   measurementId: "G-CCHZWCX8XS"
 };
-// --- INITIALIZE LIBRARIES ---
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+// --- INITIALIZE LIBRARIES (MODERN SYNTAX) ---
+const { initializeApp, getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } = window.firebaseSDK;
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 const synth = new Tone.Synth().toDestination();
 let socket;
 
@@ -28,26 +30,15 @@ const form = document.getElementById('form');
 const input = document.getElementById('input');
 const recipientName = document.getElementById('recipient-name');
 
-// --- NEW FEATURE DOM ELEMENTS ---
-const magicComposeBtn = document.getElementById('magic-compose-btn');
-const magicComposeBar = document.getElementById('magic-compose-bar');
-const gifBtn = document.getElementById('gif-btn');
-const gifModal = document.getElementById('gif-modal');
-const gifSearchInput = document.getElementById('gif-search-input');
-const gifResults = document.getElementById('gif-results');
-const closeGifModalBtn = document.getElementById('close-gif-modal');
-
 let currentRecipient = '';
 let currentUser = null;
 
-// --- AUTHENTICATION FLOW (No changes) ---
-googleSignInBtn.addEventListener('click', () => auth.signInWithRedirect(provider));
-signOutBtn.addEventListener('click', () => auth.signOut());
-// This is the updated function in your public/client.js file
+// --- AUTHENTICATION FLOW ---
+googleSignInBtn.addEventListener('click', () => signInWithRedirect(auth, provider));
+signOutBtn.addEventListener('click', () => signOut(auth));
 
-auth.onAuthStateChanged(async user => {
-    // THIS IS THE NEW DEBUGGING LINE. IT WILL TELL US WHAT'S HAPPENING.
-    console.log("Auth state changed:", user); 
+onAuthStateChanged(auth, async user => {
+    console.log("Auth state changed:", user); // Debugging line
 
     if (user) {
         currentUser = { name: user.displayName, email: user.email, uid: user.uid };
@@ -59,22 +50,65 @@ auth.onAuthStateChanged(async user => {
         showScreen('login');
     }
 });
-async function checkUserApproval() { /* This function remains the same */ }
-function showScreen(screenName) { /* This function remains the same */ }
 
+async function checkUserApproval() {
+    const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            googleId: currentUser.uid,
+            name: currentUser.name,
+            email: currentUser.email
+        }),
+    });
+    const data = await response.json();
+
+    if (data.status === 'approved') {
+        showScreen('chat');
+        initializeApp(currentUser);
+    } else {
+        showScreen('pending');
+    }
+}
+
+function showScreen(screenName) {
+    loginScreen.classList.add('hidden');
+    loadingScreen.classList.add('hidden');
+    pendingApprovalScreen.classList.add('hidden');
+    chatScreen.classList.add('hidden');
+
+    if (screenName === 'login') loginScreen.classList.remove('hidden');
+    else if (screenName === 'loading') loadingScreen.classList.remove('hidden');
+    else if (screenName === 'pending') pendingApprovalScreen.classList.remove('hidden');
+    else if (screenName === 'chat') chatScreen.classList.remove('hidden');
+}
 
 // --- CHAT APPLICATION LOGIC ---
-
 function initializeApp(user) {
-    socket = io('https://my-chat-app-azvr.onrender.com');
+    socket = io(); // Connects to the same server that serves the files
     socket.on('connect', () => socket.emit('addUser', user.name));
 
-    socket.on('updateUserList', (users) => { /* This function remains the same */ });
+    socket.on('updateUserList', (users) => {
+        userList.innerHTML = '';
+        users.forEach(u => {
+            if (u !== user.name) {
+                const li = document.createElement('li');
+                li.textContent = u;
+                li.addEventListener('click', () => {
+                    currentRecipient = u;
+                    recipientName.textContent = u;
+                    messages.innerHTML = '';
+                    document.querySelectorAll('#user-list li').forEach(item => item.classList.remove('active'));
+                    li.classList.add('active');
+                });
+                userList.appendChild(li);
+            }
+        });
+    });
 
-    socket.on('privateMessage', ({ sender, message }) => {
-        // This is now the central message handler
+    socket.on('privateMessage', ({ sender, text }) => {
         if (sender === currentRecipient || sender === user.name) {
-            displayMessage(sender, message);
+            displayMessage(sender, text);
             if (sender !== user.name) {
                 synth.triggerAttackRelease("C5", "8n");
             }
@@ -82,125 +116,23 @@ function initializeApp(user) {
     });
 }
 
-function displayMessage(sender, message) {
+function displayMessage(sender, text) {
     const item = document.createElement('div');
     item.classList.add('message');
-    if (sender === currentUser.name) item.classList.add('my-message');
-
-    // Handle different message types
-    if (message.type === 'text') {
-        item.innerHTML = `<strong>${sender}</strong><p class="message-text">${message.content}</p>`;
-    } else if (message.type === 'gif') {
-        item.classList.add('gif-message');
-        item.innerHTML = `<strong>${sender}</strong><img class="message-gif" src="${message.content}" alt="GIF">`;
-    } else if (message.type === 'image') {
-        item.classList.add('image-message');
-        item.innerHTML = `<strong>${sender}</strong><img class="message-image" src="${message.content}" alt="AI Generated Image">`;
+    if (sender === currentUser.name) {
+        item.classList.add('my-message');
     }
-
+    item.innerHTML = `<strong>${sender}</strong>: ${text}`;
     messages.appendChild(item);
     messages.scrollTop = messages.scrollHeight;
 }
 
-function sendMessage(type, content) {
-    if (content && currentRecipient) {
-        const message = { type, content };
-        socket.emit('privateMessage', { recipient: currentRecipient, message });
-    }
-}
-
-
-// --- FORM SUBMISSION ---
-form.addEventListener('submit', async (e) => {
+form.addEventListener('submit', (e) => {
     e.preventDefault();
     const text = input.value;
-    if (!text) return;
-
-    if (text.startsWith('/imagine ')) {
-        const prompt = text.substring(9);
-        displayMessage(currentUser.name, { type: 'text', content: `<em>Generating image: "${prompt}"...</em>`});
-        try {
-            const response = await fetch('/api/imagine', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt }),
-            });
-            const data = await response.json();
-            if (data.imageUrl) {
-                sendMessage('image', data.imageUrl);
-            } else {
-                 displayMessage(currentUser.name, { type: 'text', content: `<em>Image generation failed.</em>`});
-            }
-        } catch (error) {
-            console.error(error);
-            displayMessage(currentUser.name, { type: 'text', content: `<em>Image generation failed.</em>`});
-        }
-    } else {
-        sendMessage('text', text);
+    if (text && currentRecipient) {
+        socket.emit('privateMessage', { recipient: currentRecipient, text });
+        input.value = '';
     }
-    input.value = '';
-});
-
-// --- MAGIC COMPOSE LOGIC ---
-magicComposeBtn.addEventListener('click', () => {
-    magicComposeBar.classList.toggle('hidden');
-});
-
-magicComposeBar.addEventListener('click', async (e) => {
-    if (e.target.tagName === 'BUTTON') {
-        const tone = e.target.dataset.tone;
-        const text = input.value;
-        if (!text) return;
-
-        try {
-            const response = await fetch('/api/magic-compose', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, tone }),
-            });
-            const data = await response.json();
-            if (data.suggestion) {
-                input.value = data.suggestion;
-            }
-        } catch (error) {
-            console.error("Magic Compose error:", error);
-        } finally {
-            magicComposeBar.classList.add('hidden');
-        }
-    }
-});
-
-// --- GIF MODAL LOGIC ---
-gifBtn.addEventListener('click', () => gifModal.classList.remove('hidden'));
-closeGifModalBtn.addEventListener('click', () => gifModal.classList.add('hidden'));
-
-let searchTimeout;
-gifSearchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(async () => {
-        const query = gifSearchInput.value;
-        if (query.length < 2) return;
-        
-        try {
-            const response = await fetch('/api/giphy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query }),
-            });
-            const giphyData = await response.json();
-            gifResults.innerHTML = '';
-            giphyData.data.forEach(gif => {
-                const img = document.createElement('img');
-                img.src = gif.images.fixed_height_small.url;
-                img.addEventListener('click', () => {
-                    sendMessage('gif', gif.images.original.url);
-                    gifModal.classList.add('hidden');
-                });
-                gifResults.appendChild(img);
-            });
-        } catch (error) {
-            console.error("Giphy search error:", error);
-        }
-    }, 500); // Debounce to avoid too many API calls
 });
 
