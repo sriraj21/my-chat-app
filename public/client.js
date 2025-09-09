@@ -10,6 +10,7 @@ const firebaseConfig = {
   appId: "1:806882645852:web:76672d07fd064ef02ed399",
   measurementId: "G-CCHZWCX8XS"
 };
+
 // --- INITIALIZE LIBRARIES ---
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -34,12 +35,11 @@ let currentRecipient = '';
 let currentUser = null;
 
 // --- AUTHENTICATION FLOW ---
-googleSignInBtn.addEventListener('click', () => signInWithRedirect(auth, provider));
+// This line has been changed back to use the popup method.
+googleSignInBtn.addEventListener('click', () => signInWithPopup(auth, provider));
 signOutBtn.addEventListener('click', () => signOut(auth));
 
 onAuthStateChanged(auth, async user => {
-    console.log("Auth state changed:", user); // Debugging line
-
     if (user) {
         currentUser = { name: user.displayName, email: user.email, uid: user.uid };
         showScreen('loading');
@@ -48,26 +48,34 @@ onAuthStateChanged(auth, async user => {
         currentUser = null;
         if (socket) socket.disconnect();
         showScreen('login');
+        document.body.classList.remove('chat-active');
     }
 });
 
 async function checkUserApproval() {
-    const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            googleId: currentUser.uid,
-            name: currentUser.name,
-            email: currentUser.email
-        }),
-    });
-    const data = await response.json();
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                googleId: currentUser.uid,
+                name: currentUser.name,
+                email: currentUser.email
+            }),
+        });
+        const data = await response.json();
 
-    if (data.status === 'approved') {
-        showScreen('chat');
-        initializeChat(currentUser);
-    } else {
-        showScreen('pending');
+        if (data.status === 'approved') {
+            showScreen('chat');
+            document.body.classList.add('chat-active');
+            initializeChat(currentUser);
+        } else {
+            showScreen('pending');
+        }
+    } catch (error) {
+        console.error("Failed to check user approval:", error);
+        alert("Could not connect to the server to verify your account. Please try again later.");
+        signOut(auth);
     }
 }
 
@@ -85,7 +93,7 @@ function showScreen(screenName) {
 
 // --- CHAT APPLICATION LOGIC ---
 function initializeChat(user) {
-    socket = io(); // Connects to the same server that serves the files
+    socket = io();
     socket.on('connect', () => socket.emit('addUser', user.name));
 
     socket.on('updateUserList', (users) => {
@@ -107,6 +115,7 @@ function initializeChat(user) {
     });
 
     socket.on('privateMessage', ({ sender, text }) => {
+        // Only display message if it's part of the current conversation
         if (sender === currentRecipient || sender === user.name) {
             displayMessage(sender, text);
             if (sender !== user.name) {
@@ -122,7 +131,7 @@ function displayMessage(sender, text) {
     if (sender === currentUser.name) {
         item.classList.add('my-message');
     }
-    item.innerHTML = `<strong>${sender}</strong>: ${text}`;
+    item.innerHTML = `<strong>${sender}</strong><p class="message-text">${text}</p>`;
     messages.appendChild(item);
     messages.scrollTop = messages.scrollHeight;
 }

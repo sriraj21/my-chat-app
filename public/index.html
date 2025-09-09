@@ -53,18 +53,22 @@
             <div id="messages"></div>
             <form id="form">
                 <input id="input" autocomplete="off" placeholder="Type a message..." />
-                <button type="submit" aria-label="Send Message">
+                <button type="submit" id="send-btn" aria-label="Send Message">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
             </form>
         </div>
     </div>
-    
-    <!-- Libraries -->
+
+    <!-- Modern Firebase SDKs -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+
+    <!-- Other Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-
-    <!-- Main application script loaded as a module -->
+    
+    <!-- Main application script -->
     <script type="module" src="client.js"></script>
 </body>
 </html>
