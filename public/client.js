@@ -43,7 +43,12 @@ let currentUser = null;
 // --- AUTHENTICATION FLOW (No changes) ---
 googleSignInBtn.addEventListener('click', () => auth.signInWithPopup(provider));
 signOutBtn.addEventListener('click', () => auth.signOut());
+// This is the updated function in your public/client.js file
+
 auth.onAuthStateChanged(async user => {
+    // THIS IS THE NEW DEBUGGING LINE. IT WILL TELL US WHAT'S HAPPENING.
+    console.log("Auth state changed:", user); 
+
     if (user) {
         currentUser = { name: user.displayName, email: user.email, uid: user.uid };
         showScreen('loading');
