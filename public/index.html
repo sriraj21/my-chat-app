@@ -59,27 +59,13 @@
             </form>
         </div>
     </div>
-
-    <!-- === NEW, MODERN FIREBASE SDKs === -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        
-        // This makes the functions available globally for our client.js file
-        window.firebaseSDK = {
-            initializeApp,
-            getAuth,
-            GoogleAuthProvider,
-            signInWithRedirect,
-            onAuthStateChanged,
-            signOut
-        };
-    </script>
     
-    <!-- Other Libraries -->
+    <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="client.js"></script>
+
+    <!-- Main application script loaded as a module -->
+    <script type="module" src="client.js"></script>
 </body>
 </html>
 

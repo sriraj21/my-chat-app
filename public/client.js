@@ -1,3 +1,5 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBhlesPeg7mcicF7HltvK4bmLuiiAtDWgY",
@@ -8,9 +10,7 @@ const firebaseConfig = {
   appId: "1:806882645852:web:76672d07fd064ef02ed399",
   measurementId: "G-CCHZWCX8XS"
 };
-// --- INITIALIZE LIBRARIES (MODERN SYNTAX) ---
-const { initializeApp, getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } = window.firebaseSDK;
-
+// --- INITIALIZE LIBRARIES ---
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -65,7 +65,7 @@ async function checkUserApproval() {
 
     if (data.status === 'approved') {
         showScreen('chat');
-        initializeChat(currentUser); // <-- EDITED: Function call renamed
+        initializeChat(currentUser);
     } else {
         showScreen('pending');
     }
@@ -84,7 +84,6 @@ function showScreen(screenName) {
 }
 
 // --- CHAT APPLICATION LOGIC ---
-// <-- EDITED: Function declaration renamed
 function initializeChat(user) {
     socket = io(); // Connects to the same server that serves the files
     socket.on('connect', () => socket.emit('addUser', user.name));
@@ -136,5 +135,4 @@ form.addEventListener('submit', (e) => {
         input.value = '';
     }
 });
-
 
