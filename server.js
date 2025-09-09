@@ -21,7 +21,7 @@ const io = new Server(server, {});
 // --- DATABASE CONNECTION & SCHEMA ---
 const PORT = process.env.PORT || 3000;
 // IMPORTANT: Remember to put your real MongoDB password here
-const dbURI = "mongodb+srv://chat_user:PASSWORDHERE@cluster0.0nefij1.mongodb.net/chat-app?retryWrites=true&w=majority&appName=Cluster0";
+const dbURI = "mongodb+srv://chat_user:Sriraj2004@cluster0.0nefij1.mongodb.net/chat-app?retryWrites=true&w=majority&appName=Cluster0";
 
 const userSchema = new mongoose.Schema({
     googleId: { type: String, required: true, unique: true },
